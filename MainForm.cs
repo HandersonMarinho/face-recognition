@@ -31,18 +31,28 @@ namespace MultiFaceRec
         public FrmPrincipal(IVideoServer video)
         {
             InitializeComponent();
-
             Video = video;
+            InitComponents();
+        }
 
+        private void InitComponents()
+        {
             lblLabelName.Text = string.Empty;
             FontRender = new MCvFont(FONT.CV_FONT_HERSHEY_TRIPLEX, 0.5d, 0.5d);
             TrainingImages = new List<Image<Gray, byte>>();
-            LabelList = new List<string>();            
+            LabelList = new List<string>();
+            listlogs.Items.Clear();
             LoadTrainnedFace();
+
+            Detect.Enabled = true;
+            AddFace.Enabled = false;
+            StopDetection.Enabled = false;
         }
 
         private void Detect_Click(object sender, EventArgs e)
         {
+            LogIt("Initializing camera");
+
             // Initialize the capture device
             Grabber = new Capture();
             Grabber.QueryFrame();
@@ -60,8 +70,11 @@ namespace MultiFaceRec
                 });
             }, CancellationToken.None, TaskCreationOptions.None,
                TaskScheduler.FromCurrentSynchronizationContext());
-
+            LogIt("Video stream started");
+            LogIt("Frame capture started");
             Detect.Enabled = false;
+            AddFace.Enabled = true;
+            StopDetection.Enabled = true;
         }
 
         [HandleProcessCorruptedStateExceptions]
@@ -73,6 +86,7 @@ namespace MultiFaceRec
                 return;
             }
 
+            LogIt("Traning process started");
             AddFace.Enabled = false;
 
             progressBar1.Maximum = 120;
@@ -102,6 +116,7 @@ namespace MultiFaceRec
                 Invoke(inv2);
                 progressBar1.Value = 0;
                 LoadTrainnedFace();
+                LogIt("Traning process finished");
             };
             bw.RunWorkerAsync();
             AddFace.Enabled = true;
@@ -118,7 +133,10 @@ namespace MultiFaceRec
                 Gray = Grabber.QueryGrayFrame().Resize(320, 240, INTER.CV_INTER_CUBIC);
 
                 // Face Detector
-                MCvAvgComp[][] facesDetected = Gray.DetectHaarCascade(Face, 1.2, 10, HAAR_DETECTION_TYPE.DO_CANNY_PRUNING, new Size(20, 20));
+                var scaleFactor = 1.2;
+                var minNeighbors = 10;
+                var detectionType = HAAR_DETECTION_TYPE.DO_CANNY_PRUNING;
+                MCvAvgComp[][] facesDetected = Gray.DetectHaarCascade(Face, scaleFactor, minNeighbors, detectionType, new Size(20, 20));
 
                 // Action for each element detected
                 foreach (MCvAvgComp f in facesDetected[0])
@@ -126,6 +144,8 @@ namespace MultiFaceRec
                     TrainedFace = CurrentFrame.Copy(f.rect).Convert<Gray, byte>();
                     break;
                 }
+
+                LogIt($"Handle frame - scaleFactor:{scaleFactor} minNeighbors:{minNeighbors} detectionType:{detectionType.ToString()}");
 
                 string labelName = textBox1.Text.Trim().Replace(" ", "_").ToLower();
 
@@ -149,7 +169,7 @@ namespace MultiFaceRec
             {
                 // Get the current frame form capture device
                 CurrentFrame = Grabber.QueryFrame().Resize(320, 240, INTER.CV_INTER_CUBIC);
-                
+
                 Video.Serve(CurrentFrame.Bytes);
 
                 // Convert it to Grayscale
@@ -172,11 +192,14 @@ namespace MultiFaceRec
                     // Check if there is trained images to find a match
                     if (TrainingImages.ToArray().Length != 0)
                     {
-                        // TermCriteria for face recognition with numbers of trained images like maxIteration
-                        MCvTermCriteria termCrit = new MCvTermCriteria(TrainedFacesCounter, 0.001);
+                        var eigenDistanceThreshold = 3000;
+                        var eps = 0.001;
 
-                        // Eigen face recognizer
-                        FaceRecognitionEngine recognizer = new FaceRecognitionEngine(TrainingImages.ToArray(), LabelList.ToArray(), 3000, ref termCrit);
+                        // TermCriteria for face recognition with numbers of trained images like maxIteration
+                        MCvTermCriteria termCrit = new MCvTermCriteria(TrainedFacesCounter, eps);
+
+                        // Eigen face recognizer                        
+                        FaceRecognitionEngine recognizer = new FaceRecognitionEngine(TrainingImages.ToArray(), LabelList.ToArray(), eigenDistanceThreshold, ref termCrit);
                         var imgLabel = recognizer.Recognize(Result);
 
                         // Draw the label for each face detected and recognized
@@ -220,7 +243,7 @@ namespace MultiFaceRec
             }
         }
 
-        public static List<FileInfo> GetAllFiles(string rootPath)
+        private static List<FileInfo> GetAllFiles(string rootPath)
         {
             List<FileInfo> listFiles = new List<FileInfo>();
             DirectoryInfo Dir = new DirectoryInfo(rootPath);
@@ -229,6 +252,22 @@ namespace MultiFaceRec
                 listFiles.Add(File);
             }
             return listFiles;
+        }
+
+        private void LogIt(string msg)
+        {
+            MethodInvoker inv = delegate
+            {
+                listlogs.Items.Add($"{DateTime.Now.ToString("yyyy-MM-dd hh:ss")} - {msg}");
+                listlogs.SelectedIndex = listlogs.Items.Count - 1;
+            };
+            Invoke(inv);
+        }
+
+        private void StopDetection_Click(object sender, EventArgs e)
+        {
+            Grabber = null;
+            InitComponents();
         }
     }
 }

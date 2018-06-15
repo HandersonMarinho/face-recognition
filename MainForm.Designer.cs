@@ -38,13 +38,18 @@
             this.imageBoxFrameGrabber = new Emgu.CV.UI.ImageBox();
             this.lblLabelName = new System.Windows.Forms.Label();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.listlogs = new System.Windows.Forms.ListBox();
+            this.StopDetection = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.imageBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.imageBoxFrameGrabber)).BeginInit();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // AddFace
             // 
+            this.AddFace.Enabled = false;
             this.AddFace.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.AddFace.Location = new System.Drawing.Point(11, 203);
             this.AddFace.Name = "AddFace";
@@ -63,6 +68,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.StopDetection);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Controls.Add(this.textBox1);
             this.groupBox1.Controls.Add(this.imageBox1);
@@ -70,7 +76,7 @@
             this.groupBox1.Controls.Add(this.Detect);
             this.groupBox1.Location = new System.Drawing.Point(342, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(184, 245);
+            this.groupBox1.Size = new System.Drawing.Size(184, 287);
             this.groupBox1.TabIndex = 8;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Training: ";
@@ -131,11 +137,42 @@
             this.progressBar1.Size = new System.Drawing.Size(516, 23);
             this.progressBar1.TabIndex = 10;
             // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.listlogs);
+            this.groupBox2.Location = new System.Drawing.Point(532, 12);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(579, 316);
+            this.groupBox2.TabIndex = 11;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Logs";
+            // 
+            // listlogs
+            // 
+            this.listlogs.FormattingEnabled = true;
+            this.listlogs.Location = new System.Drawing.Point(6, 18);
+            this.listlogs.Name = "listlogs";
+            this.listlogs.Size = new System.Drawing.Size(567, 290);
+            this.listlogs.TabIndex = 0;
+            // 
+            // StopDetection
+            // 
+            this.StopDetection.Enabled = false;
+            this.StopDetection.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.StopDetection.Location = new System.Drawing.Point(11, 240);
+            this.StopDetection.Name = "StopDetection";
+            this.StopDetection.Size = new System.Drawing.Size(163, 31);
+            this.StopDetection.TabIndex = 9;
+            this.StopDetection.Text = "Stop Detection";
+            this.StopDetection.UseVisualStyleBackColor = true;
+            this.StopDetection.Click += new System.EventHandler(this.StopDetection_Click);
+            // 
             // FrmPrincipal
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(538, 336);
+            this.ClientSize = new System.Drawing.Size(1123, 336);
+            this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.lblLabelName);
             this.Controls.Add(this.groupBox1);
@@ -146,6 +183,7 @@
             this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.imageBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.imageBoxFrameGrabber)).EndInit();
+            this.groupBox2.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -162,6 +200,9 @@
         private System.Windows.Forms.Button Detect;
         private System.Windows.Forms.Label lblLabelName;
         private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.ListBox listlogs;
+        private System.Windows.Forms.Button StopDetection;
     }
 }
 
