@@ -64,7 +64,7 @@ namespace MultiFaceRec
                     throw new ArgumentException($"{nameof(Configuration.VideoUrl)} should start with http or https.");
 
                 if (onConnect == null)
-                    throw new ArgumentException($"{nameof(Configuration.VideoUrl)} is mandatory.");
+                    throw new ArgumentException($"{nameof(onConnect)} is mandatory.");
 
                 if (!Configuration.VideoUrl.EndsWith("/"))
                     Configuration.VideoUrl = $"{Configuration.VideoUrl}/";

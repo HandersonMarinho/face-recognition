@@ -142,7 +142,7 @@
             this.groupBox2.Controls.Add(this.listlogs);
             this.groupBox2.Location = new System.Drawing.Point(532, 12);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(579, 316);
+            this.groupBox2.Size = new System.Drawing.Size(425, 316);
             this.groupBox2.TabIndex = 11;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Logs";
@@ -152,7 +152,7 @@
             this.listlogs.FormattingEnabled = true;
             this.listlogs.Location = new System.Drawing.Point(6, 18);
             this.listlogs.Name = "listlogs";
-            this.listlogs.Size = new System.Drawing.Size(567, 290);
+            this.listlogs.Size = new System.Drawing.Size(412, 290);
             this.listlogs.TabIndex = 0;
             // 
             // StopDetection
@@ -171,7 +171,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1123, 336);
+            this.ClientSize = new System.Drawing.Size(962, 336);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.lblLabelName);

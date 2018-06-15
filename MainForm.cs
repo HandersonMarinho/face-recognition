@@ -26,14 +26,20 @@ namespace MultiFaceRec
         public List<string> LabelList { get; set; }
         public int TrainedFacesCounter { get; set; }
 
-        public IVideoServer Video { get; set; }
-
-        public FrmPrincipal(IVideoServer video)
+        public FrmPrincipal
+        (
+            IVideoServer video,
+            IConfiguration configuration
+        )
         {
             InitializeComponent();
             Video = video;
+            Configuration = configuration;
             InitComponents();
         }
+
+        public IVideoServer Video { get; set; }
+        public IConfiguration Configuration { get; set; }
 
         private void InitComponents()
         {
@@ -66,7 +72,10 @@ namespace MultiFaceRec
 
                 Video.Start((msg, err) =>
                 {
-                    // connected
+                    if (err == null)
+                    {
+                        LogIt($"Video server started at {Configuration.VideoUrl}");
+                    }
                 });
             }, CancellationToken.None, TaskCreationOptions.None,
                TaskScheduler.FromCurrentSynchronizationContext());
@@ -170,8 +179,9 @@ namespace MultiFaceRec
                 // Get the current frame form capture device
                 CurrentFrame = Grabber.QueryFrame().Resize(320, 240, INTER.CV_INTER_CUBIC);
 
-                Video.Serve(CurrentFrame.Bytes);
-
+                //Video.Serve(CurrentFrame.Bytes);
+                //System.Diagnostics.Debug.Print(Convert.ToBase64String(CurrentFrame.Bytes));
+                
                 // Convert it to Grayscale
                 Gray = CurrentFrame.Convert<Gray, byte>();
 

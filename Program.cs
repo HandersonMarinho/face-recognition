@@ -25,7 +25,7 @@ namespace MultiFaceRec
             IConfiguration config = new Configuration(ConfigurationManager.AppSettings);
             IVideoServer video = new VideoServer(config);
 
-            return new FrmPrincipal(video);
+            return new FrmPrincipal(video, config);
         }
     }
 }
