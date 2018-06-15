@@ -1,6 +1,8 @@
 ﻿using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
+using MaterialSkin;
+using MaterialSkin.Controls;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,7 +15,7 @@ using System.Windows.Forms;
 
 namespace MultiFaceRec
 {
-    public partial class FrmPrincipal : Form
+    public partial class FrmPrincipal : MaterialForm
     {
         public Image<Bgr, byte> CurrentFrame { get; set; }
         public Capture Grabber { get; set; }
@@ -48,14 +50,14 @@ namespace MultiFaceRec
             TrainingImages = new List<Image<Gray, byte>>();
             LabelList = new List<string>();
             listlogs.Items.Clear();
+            listBoxStats.Items.Clear();
             LoadTrainnedFace();
 
-            Detect.Enabled = true;
-            AddFace.Enabled = false;
-            StopDetection.Enabled = false;
+            btnDetect.Enabled = true;
+            btnTrain.Enabled = false;
         }
 
-        private void Detect_Click(object sender, EventArgs e)
+        private void btnDetect_Click_1(object sender, EventArgs e)
         {
             LogIt("Initializing camera");
 
@@ -81,13 +83,12 @@ namespace MultiFaceRec
                TaskScheduler.FromCurrentSynchronizationContext());
             LogIt("Video stream started");
             LogIt("Frame capture started");
-            Detect.Enabled = false;
-            AddFace.Enabled = true;
-            StopDetection.Enabled = true;
+            btnDetect.Enabled = false;
+            btnTrain.Enabled = true;
         }
 
         [HandleProcessCorruptedStateExceptions]
-        private void AddFace_Click(object sender, EventArgs e)
+        private void btnTrain_Click_1(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(textBox1.Text))
             {
@@ -96,7 +97,7 @@ namespace MultiFaceRec
             }
 
             LogIt("Traning process started");
-            AddFace.Enabled = false;
+            btnTrain.Enabled = false;
 
             progressBar1.Maximum = 120;
             progressBar1.Step = 1;
@@ -128,7 +129,7 @@ namespace MultiFaceRec
                 LogIt("Traning process finished");
             };
             bw.RunWorkerAsync();
-            AddFace.Enabled = true;
+            btnTrain.Enabled = true;
         }
 
         [HandleProcessCorruptedStateExceptions]
@@ -181,7 +182,7 @@ namespace MultiFaceRec
 
                 //Video.Serve(CurrentFrame.Bytes);
                 //System.Diagnostics.Debug.Print(Convert.ToBase64String(CurrentFrame.Bytes));
-                
+
                 // Convert it to Grayscale
                 Gray = CurrentFrame.Convert<Gray, byte>();
 
@@ -211,6 +212,7 @@ namespace MultiFaceRec
                         // Eigen face recognizer                        
                         FaceRecognitionEngine recognizer = new FaceRecognitionEngine(TrainingImages.ToArray(), LabelList.ToArray(), eigenDistanceThreshold, ref termCrit);
                         var imgLabel = recognizer.Recognize(Result);
+                        LogStats($"{imgLabel} - Recognized");
 
                         // Draw the label for each face detected and recognized
                         // CurrentFrame.Draw(imgLabel, ref Font, new Point(face.rect.X - 2, face.rect.Y - 2), new Bgr(Color.White));                    
@@ -274,10 +276,14 @@ namespace MultiFaceRec
             Invoke(inv);
         }
 
-        private void StopDetection_Click(object sender, EventArgs e)
+        private void LogStats(string msg)
         {
-            Grabber = null;
-            InitComponents();
+            MethodInvoker inv = delegate
+            {
+                listBoxStats.Items.Add($"{DateTime.Now.ToString("yyyy-MM-dd hh:ss")} - {msg}");
+                listBoxStats.SelectedIndex = listBoxStats.Items.Count - 1;
+            };
+            Invoke(inv);
         }
     }
 }
