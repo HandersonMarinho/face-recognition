@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -7,9 +8,6 @@ namespace MultiFaceRec
 {
     static class Program
     {
-        /// <summary>
-        /// Punto de entrada principal para la aplicación.
-        /// </summary>
         [STAThread]
         static void Main()
         {
@@ -17,9 +15,17 @@ namespace MultiFaceRec
             {
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                Application.Run(new FrmPrincipal());
+                Application.Run(Bootstrap());
             }
             catch { }
+        }
+
+        static FrmPrincipal Bootstrap()
+        {
+            IConfiguration config = new Configuration(ConfigurationManager.AppSettings);
+            IVideoServer video = new VideoServer(config);
+
+            return new FrmPrincipal(video);
         }
     }
 }

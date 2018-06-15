@@ -15,24 +15,29 @@ namespace MultiFaceRec
 {
     public partial class FrmPrincipal : Form
     {
-        private Image<Bgr, byte> CurrentFrame { get; set; }
-        private Capture Grabber { get; set; }
-        private HaarCascade Face { get; set; }
-        private MCvFont FontRender { get; set; }
-        private Image<Gray, byte> Result { get; set; }
-        private Image<Gray, byte> TrainedFace { get; set; }
-        private Image<Gray, byte> Gray { get; set; }
-        private List<Image<Gray, byte>> TrainingImages { get; set; }
-        private List<string> LabelList { get; set; }
-        private int TrainedFacesCounter { get; set; }
+        public Image<Bgr, byte> CurrentFrame { get; set; }
+        public Capture Grabber { get; set; }
+        public HaarCascade Face { get; set; }
+        public MCvFont FontRender { get; set; }
+        public Image<Gray, byte> Result { get; set; }
+        public Image<Gray, byte> TrainedFace { get; set; }
+        public Image<Gray, byte> Gray { get; set; }
+        public List<Image<Gray, byte>> TrainingImages { get; set; }
+        public List<string> LabelList { get; set; }
+        public int TrainedFacesCounter { get; set; }
 
-        public FrmPrincipal()
+        public IVideoServer Video { get; set; }
+
+        public FrmPrincipal(IVideoServer video)
         {
             InitializeComponent();
+
+            Video = video;
+
             lblLabelName.Text = string.Empty;
             FontRender = new MCvFont(FONT.CV_FONT_HERSHEY_TRIPLEX, 0.5d, 0.5d);
             TrainingImages = new List<Image<Gray, byte>>();
-            LabelList = new List<string>();
+            LabelList = new List<string>();            
             LoadTrainnedFace();
         }
 
@@ -48,6 +53,11 @@ namespace MultiFaceRec
                 timer.Elapsed += FaceMonitoring;
                 timer.Interval = 200;
                 timer.Enabled = true;
+
+                Video.Start((msg, err) =>
+                {
+                    // connected
+                });
             }, CancellationToken.None, TaskCreationOptions.None,
                TaskScheduler.FromCurrentSynchronizationContext());
 
@@ -80,7 +90,7 @@ namespace MultiFaceRec
             bw.DoWork += (s, ev) =>
             {
                 for (int i = 0; i < 15; i++)
-                {                    
+                {
                     bw.ReportProgress(7);
                     SavePicture(null, null);
                     Task.Delay(200).Wait();
@@ -122,18 +132,10 @@ namespace MultiFaceRec
                 // Resize face detected image in order to force to compare the same size with the 
                 // Test image with cubic interpolation type method
                 TrainedFace = Result.Resize(100, 100, INTER.CV_INTER_CUBIC);
-                //TrainingImages.Add(TrainedFace);
-                //LabelList.Add(labelName);
 
                 // Show face added in gray scale
                 imageBox1.Image = TrainedFace;
 
-                // Write the labels of triained faces in a file text for further load
-                //for (int i = 1; i < TrainingImages.ToArray().Length + 1; i++)
-                //{
-                //    var imgPath = $"/TrainedFaces/{labelName}@face{i}.bmp";
-                //    TrainingImages.ToArray()[i - 1].Save(Application.StartupPath + imgPath);
-                //}
                 var imgPath = $"/TrainedFaces/{labelName}@face{DateTime.Now.ToString("yyyymmddhhmmssmm")}.bmp";
                 TrainedFace.Save(Application.StartupPath + imgPath);
             }
@@ -147,6 +149,8 @@ namespace MultiFaceRec
             {
                 // Get the current frame form capture device
                 CurrentFrame = Grabber.QueryFrame().Resize(320, 240, INTER.CV_INTER_CUBIC);
+                
+                Video.Serve(CurrentFrame.Bytes);
 
                 // Convert it to Grayscale
                 Gray = CurrentFrame.Convert<Gray, byte>();
